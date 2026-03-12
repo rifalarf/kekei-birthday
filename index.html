@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Background Music -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="assets/music.mp3" type="audio/mpeg">
+    </audio>
+
     <!-- CRT Scanline Effect Overlay -->
     <div class="scanlines"></div>
 
@@ -45,9 +50,53 @@
 
         <!-- Win Screen -->
         <div id="win-screen" class="screen">
-            <h1 class="title rainbow-text">HAPPY BIRTHDAY!</h1>
-            <div class="message-box"></div>
-            <p class="blink" style="margin-top: 20px; font-size: 10px; cursor: pointer; display: none;" id="btn-restart">TAP TO PLAY AGAIN</p>
+            <h1 class="title rainbow-text">YEAYYY!</h1>
+            <p style="font-size: 10px; line-height: 1.5; margin-bottom: 20px;">Kamu berhasil mengumpulkan semua item!</p>
+            <button id="btn-next-letter" class="game-btn" style="display:none;">Buka Hadiah Rahasia</button>
+        </div>
+
+        <!-- Letter Screen -->
+        <div id="letter-screen" class="screen">
+            <p class="subtitle" style="margin-bottom: 10px;">Seseorang mengirimimu surat...</p>
+            <div class="envelope" id="envelope">
+                <div class="flap"></div>
+                <div class="letter">
+                    <div id="letter-text"></div>
+                </div>
+            </div>
+            <p class="instructions blink" id="envelope-instruction" style="margin-top: 20px;">Ketuk amplop untuk membuka</p>
+            <button id="btn-next-cake" class="game-btn" style="display:none; margin-top: 15px; position: absolute; bottom: 30px; z-index: 10;">Lanjut >></button>
+        </div>
+
+        <!-- Cake Screen -->
+        <div id="cake-screen" class="screen">
+            <h1 class="title" style="font-size: 16px;">Waktunya Tiup Lilin!</h1>
+            <p class="instructions blink" id="cake-instruction">Ketuk kue berkali-kali untuk meniupnya!</p>
+            
+            <div class="cake-container" id="cake-container">
+                <div class="candle" id="candle-1"><div class="flame"></div></div>
+                <div class="candle" id="candle-2"><div class="flame" style="animation-delay: 0.1s;"></div></div>
+                <div class="candle" id="candle-3"><div class="flame" style="animation-delay: 0.2s;"></div></div>
+                <div class="cake-body">🎂</div>
+            </div>
+        </div>
+
+        <!-- Final Screen -->
+        <div id="final-screen" class="screen">
+            <h1 class="title rainbow-text" style="font-size: 20px; margin-bottom: 10px;">MAKE A WISH!</h1>
+            
+            <!-- Polaroid Photo of Kekei -->
+            <div class="polaroid">
+                <img src="assets/photo.jpg" alt="Foto Kekei" onerror="this.src='https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?w=400';">
+                <div class="caption">Hi Kekei manis</div>
+            </div>
+
+            <div class="message-box" style="margin-top: 15px;">
+                <p>Selamat ulang tahun Kekei sayang!</p>
+                <br>
+                <p>Semoga semua harapan dan impianmu terwujud. Di tahun yang baru ini, semoga kamu selalu diberikan kebahagiaan, kesehatan, dan kelancaran untuk segalanya.</p>
+            </div>
+            <p class="blink" style="margin-top: 20px; font-size: 10px; cursor: pointer;" id="btn-restart">TAP TO PLAY AGAIN</p>
         </div>
     </div>
 

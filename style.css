@@ -85,12 +85,7 @@ body {
     40%, 60% { transform: translate3d(6px, 0, 0); }
 }
 
-#win-screen {
-    background-color: rgba(26, 11, 46, 0.85); /* Translucent dark background */
-    z-index: 20; /* Ensure it floats above canvas */
-}
-
-/* Screens */
+/* Hide screens by default */
 .screen {
     position: absolute;
     top: 0;
@@ -103,6 +98,17 @@ body {
     align-items: center;
     text-align: center;
     padding: 20px;
+    z-index: 20; /* Ensure it floats above canvas */
+    background-color: rgba(26, 11, 46, 0.85); /* Translucent dark background */
+}
+
+/* Make start and game screens solid or fully transparent differently */
+#start-screen {
+    background-color: var(--bg-color);
+}
+#game-screen {
+    background-color: transparent;
+    z-index: 1; /* lowest z-index since canvas is here */
 }
 
 .screen.active {
@@ -137,7 +143,7 @@ body {
 }
 
 .instructions {
-    font-size: 12px;
+    font-size: 10px;
     line-height: 2;
     margin-bottom: 30px;
 }
@@ -146,7 +152,26 @@ body {
     animation: blinker 1.5s linear infinite;
     color: #ffeb3b;
     margin-top: 20px;
-    font-size: 14px;
+    font-size: 10px;
+}
+
+/* Buttons */
+.game-btn {
+    background: rgba(255, 71, 126, 0.8);
+    border: 2px solid var(--primary);
+    color: white;
+    padding: 15px 25px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    border-radius: 5px;
+    margin-top: 20px;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--primary);
+    transition: transform 0.1s, background 0.2s;
+}
+.game-btn:active, .game-btn:hover {
+    transform: scale(0.95);
+    background: rgba(255, 71, 126, 1);
 }
 
 /* Pixels and Animations */
@@ -192,9 +217,10 @@ body {
     border: 2px solid var(--secondary);
     padding: 20px;
     border-radius: 10px;
-    font-size: 12px;
+    font-size: 10px;
     line-height: 1.8;
     box-shadow: inset 0 0 10px var(--secondary);
+    max-width: 90%;
 }
 
 .message-box p {
@@ -230,3 +256,170 @@ body {
     display: none !important;
 }
 
+/* ENVELOPE STYLES */
+.envelope {
+    position: relative;
+    width: 280px;
+    height: 180px;
+    background: #ff7096;
+    margin: 40px auto;
+    cursor: pointer;
+    transition: transform 0.3s;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    z-index: 21;
+}
+.envelope::before, .envelope::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+.envelope::before {
+    border-style: solid;
+    border-width: 0 140px 90px 140px;
+    border-color: transparent transparent #ff477e transparent;
+    bottom: 0;
+    left: 0;
+    z-index: 23;
+}
+.envelope::after {
+    border-style: solid;
+    border-width: 90px 140px;
+    border-color: #ff9eaa #ff477e #ff477e #ff9eaa;
+    top: 0;
+    left: 0;
+    z-index: 21;
+}
+.flap {
+    position: absolute;
+    top: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 90px 140px 0 140px;
+    border-color: #ffb3c6 transparent transparent transparent;
+    transform-origin: top;
+    left: 0;
+    transition: transform 0.6s 0.2s;
+    z-index: 24;
+}
+.envelope.open .flap {
+    transform: rotateX(180deg);
+    z-index: 21;
+}
+.letter {
+    position: absolute;
+    bottom: 0px;
+    left: 15px;
+    width: 250px;
+    height: 160px;
+    background: #fff;
+    color: #000;
+    font-size: 12px;
+    padding: 20px 15px;
+    transition: transform 0.8s 0.8s, height 0.8s 0.8s;
+    z-index: 22;
+    overflow: hidden;
+    line-height: 1.6;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    border-radius: 4px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    text-align: left;
+}
+.envelope.open .letter {
+    transform: translateY(-80px); /* slide up */
+    height: 250px; /* unfold */
+    z-index: 25; /* come to front */
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+}
+
+/* CAKE STYLES */
+.cake-container {
+    position: relative;
+    margin-top: 30px;
+    cursor: pointer;
+    transition: transform 0.1s;
+    user-select: none;
+}
+.cake-container:active {
+    transform: scale(0.98);
+}
+.cake-body {
+    font-size: 120px;
+    position: relative;
+    z-index: 5;
+    text-shadow: 0 0 20px var(--primary);
+    pointer-events: none; /* Let clicks pass to container */
+}
+.candle {
+    position: absolute;
+    width: 12px;
+    height: 35px;
+    background: linear-gradient(to right, #fff, #ffe0e0);
+    border: 1px solid #ff477e;
+    border-radius: 2px;
+    z-index: 4;
+    pointer-events: none; /* Let clicks pass to container */
+}
+/* Positioning the 3 candles above the emoji cake */
+#candle-1 { top: 0px; left: 40px; transform: rotate(-5deg); }
+#candle-2 { top: -10px; left: 65px; }
+#candle-3 { top: 0px; left: 90px; transform: rotate(5deg); }
+
+.flame {
+    position: absolute;
+    top: -18px;
+    left: 2px;
+    width: 8px;
+    height: 18px;
+    background: #ffeb3b;
+    border-radius: 50% 50% 20% 20%;
+    box-shadow: 0 0 10px #ffeb3b, 0 0 20px #ff9800;
+    animation: flicker 0.1s infinite alternate;
+    transition: opacity 0.2s;
+}
+.flame.off {
+    display: none;
+}
+@keyframes flicker {
+    0% { transform: scale(1) translate(0, 0); opacity: 1; }
+    100% { transform: scale(1.1) translate(1px, -1px); opacity: 0.8; }
+}
+
+/* Polaroid Photo Frame */
+.polaroid {
+    background: #fff;
+    padding: 10px 10px 20px 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    transform: rotate(5deg);
+    display: inline-block;
+    border-radius: 2px;
+    margin-bottom: 20px;
+    animation: floatingPolaroid 4s ease-in-out infinite;
+    max-width: 80%;
+}
+
+.polaroid img {
+    max-width: 200px;
+    width: 100%;
+    height: auto;
+    display: block;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+
+.polaroid .caption {
+    color: #333;
+    font-size: 10px;
+    margin-top: 15px;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+}
+
+@keyframes floatingPolaroid {
+    0%, 100% { transform: translateY(0) rotate(5deg); }
+    50% { transform: translateY(-10px) rotate(2deg); }
+}
