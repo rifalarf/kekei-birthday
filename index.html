@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <!-- Background Music -->
     <audio id="bg-music" loop preload="auto">
@@ -40,7 +42,7 @@
                 <div id="score-display">❤️ 0/12 | 🧋 0/3 | 🍫 0/8</div>
             </div>
             <canvas id="game-canvas"></canvas>
-            
+
             <!-- Mobile Controls (Hidden) -->
             <div id="mobile-controls">
                 <button id="btn-left">◀</button>
@@ -51,7 +53,8 @@
         <!-- Win Screen -->
         <div id="win-screen" class="screen">
             <h1 class="title rainbow-text">YEAYYY!</h1>
-            <p style="font-size: 10px; line-height: 1.5; margin-bottom: 20px;">Kamu berhasil mengumpulkan semua item!</p>
+            <p style="font-size: 10px; line-height: 1.5; margin-bottom: 20px;">Kamu berhasil mengumpulkan semua item!
+            </p>
             <button id="btn-next-letter" class="game-btn" style="display:none;">Buka Hadiah Rahasia</button>
         </div>
 
@@ -64,19 +67,28 @@
                     <div id="letter-text"></div>
                 </div>
             </div>
-            <p class="instructions blink" id="envelope-instruction" style="margin-top: 20px;">Ketuk amplop untuk membuka</p>
-            <button id="btn-next-cake" class="game-btn" style="display:none; margin-top: 15px; position: absolute; bottom: 30px; z-index: 10;">Lanjut >></button>
+            <p class="instructions blink" id="envelope-instruction" style="margin-top: 20px;">Ketuk amplop untuk membuka
+            </p>
+            <button id="btn-next-cake" class="game-btn"
+                style="display:none; margin-top: 15px; position: absolute; bottom: 30px; z-index: 10;">Lanjut
+                >></button>
         </div>
 
         <!-- Cake Screen -->
         <div id="cake-screen" class="screen">
             <h1 class="title" style="font-size: 16px;">Waktunya Tiup Lilin!</h1>
             <p class="instructions blink" id="cake-instruction">Ketuk kue berkali-kali untuk meniupnya!</p>
-            
+
             <div class="cake-container" id="cake-container">
-                <div class="candle" id="candle-1"><div class="flame"></div></div>
-                <div class="candle" id="candle-2"><div class="flame" style="animation-delay: 0.1s;"></div></div>
-                <div class="candle" id="candle-3"><div class="flame" style="animation-delay: 0.2s;"></div></div>
+                <div class="candle" id="candle-1">
+                    <div class="flame"></div>
+                </div>
+                <div class="candle" id="candle-2">
+                    <div class="flame" style="animation-delay: 0.1s;"></div>
+                </div>
+                <div class="candle" id="candle-3">
+                    <div class="flame" style="animation-delay: 0.2s;"></div>
+                </div>
                 <div class="cake-body">🎂</div>
             </div>
         </div>
@@ -84,22 +96,26 @@
         <!-- Final Screen -->
         <div id="final-screen" class="screen">
             <h1 class="title rainbow-text" style="font-size: 20px; margin-bottom: 10px;">MAKE A WISH!</h1>
-            
+
             <!-- Polaroid Photo of Kekei -->
             <div class="polaroid">
-                <img src="assets/photo.jpg" alt="Foto Kekei" onerror="this.src='https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?w=400';">
+                <img src="assets/photo.jpg" alt="Foto Kekei"
+                    onerror="this.src='https://images.unsplash.com/photo-1518806118471-f28b20a1d79d?w=400';">
                 <div class="caption">Hi Kekei manis</div>
             </div>
 
             <div class="message-box" style="margin-top: 15px;">
-                <p>Selamat ulang tahun Kekei sayang!</p>
+                <p>Met ultah Kekei sayang!</p>
                 <br>
-                <p>Semoga semua harapan dan impianmu terwujud. Di tahun yang baru ini, semoga kamu selalu diberikan kebahagiaan, kesehatan, dan kelancaran untuk segalanya.</p>
+                <p>Semoga semua harapan dan impian kamu terwujud. Di tahun yang baru ini, semoga kamu selalu diberikan
+                    kebahagiaan, kesehatan, dan kelancaran untuk segalanya yaa.</p>
             </div>
-            <p class="blink" style="margin-top: 20px; font-size: 10px; cursor: pointer;" id="btn-restart">TAP TO PLAY AGAIN</p>
+            <p class="blink" style="margin-top: 20px; font-size: 10px; cursor: pointer;" id="btn-restart">TAP TO PLAY
+                AGAIN</p>
         </div>
     </div>
 
     <script src="script.js"></script>
 </body>
+
 </html>
