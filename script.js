@@ -63,49 +63,68 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Game State
     let gameState = 'START'; // START, PLAYING, WIN
-    const WIN_SCORE = 20;
-    let score = 0;
+    
+    // Default requirements
+    const WIN_REQS = {
+        HEART: 12,
+        BOBA: 3,
+        CHOCO: 8
+    };
+    
+    let caught = { HEART: 0, BOBA: 0, CHOCO: 0 };
     let animationId;
     
     // Virtual resolution for pixel art feel
     const GAME_WIDTH = 320;
     const GAME_HEIGHT = 480;
     
-    // Controls
-    const keys = {
-        left: false,
-        right: false
-    };
+    // Controls -> Changed to Drag/Touch instead of keys
+    // We only need an internal target X
+    let targetX = GAME_WIDTH / 2 - 20;
 
     // --- GAME OBJECTS ---
     
     const player = {
         x: GAME_WIDTH / 2 - 20,
-        y: GAME_HEIGHT - 50,
+        y: GAME_HEIGHT - 60,
         width: 40,
-        height: 40, // Made slightly bigger for emoji
-        speed: 5,
-        emoji: '🧺', // Cute picnic basket!
+        height: 40,
+        emoji: '🧺',
+        bounceScale: 1, // For bounce animation
         
         draw(ctx) {
-            ctx.font = '36px sans-serif'; // Use system font for emoji
+            ctx.save(); // Save context state
+            
+            // Translate to center of player for scaling
+            ctx.translate(this.x + this.width/2, this.y + this.height/2);
+            ctx.scale(this.bounceScale, this.bounceScale);
+            
+            ctx.font = '36px sans-serif'; 
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            // Draw emoji centered in the hit box
-            ctx.fillText(this.emoji, this.x + this.width/2, this.y + this.height/2);
+            ctx.fillText(this.emoji, 0, 0); // Drawn at origin
             
-            // Optional: Draw debug hitbox
-            // ctx.strokeStyle = 'red';
-            // ctx.strokeRect(this.x, this.y, this.width, this.height);
+            ctx.restore(); // Restore context state
         },
         
         update() {
-            if (keys.left) this.x -= this.speed;
-            if (keys.right) this.x += this.speed;
+            // Smoothly move player to targetX (lerp)
+            this.x += (targetX - (this.x + this.width/2)) * 0.2;
+            
+            // Bounce recover
+            if (this.bounceScale > 1) {
+                this.bounceScale -= 0.05;
+            } else if (this.bounceScale < 1) {
+                this.bounceScale = 1;
+            }
             
             // Bounds
             if (this.x < 0) this.x = 0;
             if (this.x + this.width > GAME_WIDTH) this.x = GAME_WIDTH - this.width;
+        },
+        
+        bounce() {
+            this.bounceScale = 1.4;
         }
     };
     
@@ -125,7 +144,9 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (rand < 0.9) this.type = 'CHOCO'; // 15% chance
             else this.type = 'ROACH'; // 10% chance
             
-            this.speed = 2 + Math.random() * 3 + (score * 0.1);
+            // Increase speed based on total caught
+            const totalCaught = caught.HEART + caught.BOBA + caught.CHOCO;
+            this.speed = 2 + Math.random() * 3 + (totalCaught * 0.05);
             
             this.colors = {
                 'HEART': '#ff477e',
@@ -168,6 +189,69 @@ document.addEventListener('DOMContentLoaded', () => {
         update() {
             this.y += this.speed;
         }
+    }
+    
+    // --- FLOATING TEXT SYSTEM ---
+    let floatingTexts = [];
+    class FloatingText {
+        constructor(x, y, text, color) {
+            this.x = x;
+            this.y = y;
+            this.text = text;
+            this.color = color;
+            this.life = 1.0;
+            this.velocityY = -2;
+        }
+        
+        draw(ctx) {
+            ctx.save();
+            ctx.globalAlpha = this.life;
+            ctx.fillStyle = this.color;
+            ctx.font = 'bold 16px "Press Start 2P", monospace';
+            ctx.textAlign = 'center';
+            // adding small stroke for visibility
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.strokeText(this.text, this.x, this.y);
+            ctx.fillText(this.text, this.x, this.y);
+            ctx.restore();
+        }
+        
+        update() {
+            this.y += this.velocityY;
+            this.life -= 0.03;
+        }
+    }
+
+    // --- STAR FIELD BACKGROUND ---
+    let stars = [];
+    function initStars() {
+        stars = [];
+        for(let i=0; i<50; i++) {
+            stars.push({
+                x: Math.random() * GAME_WIDTH,
+                y: Math.random() * GAME_HEIGHT,
+                size: Math.random() * 2 + 1,
+                blinkSpeed: Math.random() * 0.05 + 0.01,
+                alpha: Math.random()
+            });
+        }
+    }
+
+    function drawStars(ctx, intensity) {
+        // intensity is from 0.0 to 1.0 (based on game progress)
+        if (intensity <= 0.1) return; // Only show when progress is substantial
+        
+        ctx.save();
+        stars.forEach(star => {
+            star.alpha += star.blinkSpeed;
+            const currentAlpha = (Math.sin(star.alpha) * 0.5 + 0.5) * intensity;
+            ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha})`;
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.restore();
     }
     
     // --- CONFETTI SYSTEM ---
@@ -219,13 +303,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- MAIN FUNCTIONS ---
     
     function initGame() {
-        score = 0;
+        caught = { HEART: 0, BOBA: 0, CHOCO: 0 };
         items = [];
+        floatingTexts = [];
         particles = []; // Clear confetti
         player.x = GAME_WIDTH / 2 - player.width / 2;
+        targetX = GAME_WIDTH / 2;
+        initStars();
         updateScoreDisplay();
-        keys.left = false;
-        keys.right = false;
     }
     
     function startGame() {
@@ -273,18 +358,14 @@ document.addEventListener('DOMContentLoaded', () => {
         winScreen.classList.add('active');
         window.removeEventListener('resize', resizeCanvas);
         
-        // Start Confetti Effect on Win Screen canvas if we had one, 
-        // but since it's DOM, let's keep drawing it on the game-canvas and just overlay the win screen
-        // So we don't hide the game canvas!
         gameScreen.classList.add('active'); // Keep game screen active for background canvas
         document.getElementById('ui-bar').style.display = 'none'; // hide UI
-        document.getElementById('mobile-controls').style.display = 'none'; // hide controls
         
         createConfetti();
         
         // Typewriter Effect
         const msgBox = document.querySelector('.message-box');
-        const typedText = `Selamat Ulang Tahun, Kekei sayang!<br><br>Semoga harimu dipenuhi kebahagiaan, senyum manis, dan cinta yang banyak.<br><br>Sama seperti langit yang mencerah, kamu selalu mencerahkan hariku. Terima kasih sudah menangkap semua hatiku! Aku sayang kamu! 💕`;
+        const typedText = `Selamat Ulang Tahun, Kekei sayang!<br><br>Semoga harimu dipenuhi kebahagiaan, senyum manis, dan cinta yang banyak.<br><br>Terima kasih sudah menangkap semua kenangan manis ini! Aku sayang kamu! 💕`;
         msgBox.innerHTML = ''; // Clear initial text
         
         btnRestart.style.display = 'none'; // Hide restart initially
@@ -295,8 +376,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000); // 1 second delay before typing starts
     }
     
+    // Calculates overall progress 0.0 to 1.0 based on current catch / requirements
+    function getProgress() {
+        const pHeart = Math.min(caught.HEART / WIN_REQS.HEART, 1);
+        const pBoba = Math.min(caught.BOBA / WIN_REQS.BOBA, 1);
+        const pChoco = Math.min(caught.CHOCO / WIN_REQS.CHOCO, 1);
+        return (pHeart + pBoba + pChoco) / 3.0; // Average of all three
+    }
+    
     function updateScoreDisplay() {
-        scoreDisplay.textContent = `Hati: ${score}/${WIN_SCORE}`;
+        scoreDisplay.innerHTML = `❤️ ${caught.HEART}/${WIN_REQS.HEART} &nbsp;|&nbsp; 🧋 ${caught.BOBA}/${WIN_REQS.BOBA} &nbsp;|&nbsp; 🍫 ${caught.CHOCO}/${WIN_REQS.CHOCO}`;
     }
     
     function resizeCanvas() {
@@ -311,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let lastTime = 0;
     let itemSpawnTimer = 0;
-    const SPAWN_RATE = 800; // ms
+    const SPAWN_RATE = 700; // ms (slightly faster to account for more items required)
     
     function gameLoop(timestamp) {
         if (gameState !== 'PLAYING') return;
@@ -352,25 +441,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.y <= player.y + player.height) {
                 
                 // Hit!
-                if (item.type === 'HEART') {
-                    score += 1;
-                    sounds.catchHeart();
-                } else if (item.type === 'BOBA' || item.type === 'CHOCO') {
-                    score += 2;
-                    sounds.catchStar();
+                if (item.type === 'HEART' || item.type === 'BOBA' || item.type === 'CHOCO') {
+                    // Only count up to the limit? No, let them catch more but it maxes at req for win check.
+                    caught[item.type]++;
+                    player.bounce();
+                    
+                    if (item.type === 'HEART') sounds.catchHeart();
+                    else sounds.catchStar();
+                    
+                    // Floating text feedback
+                    floatingTexts.push(new FloatingText(item.x + item.size/2, item.y, "+1", item.type === 'HEART' ? '#ff477e' : '#fff'));
+                    
                 } else if (item.type === 'ROACH') {
-                    score = Math.max(0, score - 3); // Lose score but don't go below 0
+                    // Penalty! Remove random caught item
+                    if (caught.HEART > 0) caught.HEART--;
+                    else if (caught.CHOCO > 0) caught.CHOCO--;
+                    else if (caught.BOBA > 0) caught.BOBA--;
+                    
                     sounds.bombHit();
+                    // Screen shake
+                    const container = document.getElementById('game-container');
+                    container.classList.remove('shake');
+                    void container.offsetWidth; // trigger reflow
+                    container.classList.add('shake');
+                    
+                    // Floating text feedback
+                    floatingTexts.push(new FloatingText(item.x + item.size/2, item.y, "YAK!", "red"));
+                    
                     // Visual feedback for bomb hit
-                    document.getElementById('game-container').style.boxShadow = '0 0 30px red';
-                    setTimeout(() => document.getElementById('game-container').style.boxShadow = '0 0 20px var(--primary)', 300);
+                    container.style.boxShadow = '0 0 30px red';
+                    setTimeout(() => container.style.boxShadow = '0 0 20px var(--primary)', 300);
                 }
                 
                 updateScoreDisplay();
                 items.splice(i, 1);
                 
                 // Check win condition
-                if (score >= WIN_SCORE) {
+                if (caught.HEART >= WIN_REQS.HEART && caught.BOBA >= WIN_REQS.BOBA && caught.CHOCO >= WIN_REQS.CHOCO) {
                     sounds.win();
                     winGame();
                     return;
@@ -381,12 +488,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 items.splice(i, 1);
             }
         }
+        
+        // Update floating texts
+        for(let i = floatingTexts.length - 1; i >= 0; i--) {
+            floatingTexts[i].update();
+            if(floatingTexts[i].life <= 0) {
+                floatingTexts.splice(i, 1);
+            }
+        }
     }
     
     function draw() {
         // Calculate background color based on score
-        // From dark purple to sunrise pink
-        const progress = Math.min(score / WIN_SCORE, 1);
+        const progress = Math.min(getProgress(), 1.0);
         
         // Night: rgb(45, 20, 69)
         // Dawn:  rgb(255, 158, 170) -- var(--accent)
@@ -400,6 +514,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Clear background with dynamic color
         ctx.fillStyle = `rgb(${currentR}, ${currentG}, ${currentB})`;
         ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        
+        // Draw Stars
+        drawStars(ctx, progress);
         
         // Draw grid for retro feel
         ctx.strokeStyle = 'rgba(255, 71, 126, 0.1)';
@@ -419,6 +536,9 @@ document.addEventListener('DOMContentLoaded', () => {
             items.forEach(item => item.draw(ctx));
         }
 
+        // Draw Floating Texts
+        floatingTexts.forEach(ft => ft.draw(ctx));
+
         // Draw Confetti if won
         if (gameState === 'WIN') {
             drawConfetti(ctx);
@@ -427,31 +547,53 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- INPUT HANDLING ---
     
-    // Keyboard
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-        if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
+    function setTargetX(clientX) {
+        const rect = canvas.getBoundingClientRect();
+        // Scale clientX to canvas internal resolution
+        const scaleX = canvas.width / rect.width;
+        targetX = (clientX - rect.left) * scaleX;
+    }
+    
+    // Mouse / Touch Drag Support
+    let isDragging = false;
+    
+    // Mouse Events
+    canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        setTargetX(e.clientX);
     });
     
-    window.addEventListener('keyup', (e) => {
-        if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-        if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+    window.addEventListener('mousemove', (e) => {
+        if (isDragging && gameState === 'PLAYING') {
+            setTargetX(e.clientX);
+        }
     });
     
-    // Mobile Touch Buttons
-    const btnLeft = document.getElementById('btn-left');
-    const btnRight = document.getElementById('btn-right');
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
     
-    btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); keys.left = true; });
-    btnLeft.addEventListener('touchend', (e) => { e.preventDefault(); keys.left = false; });
+    // Touch Events
+    canvas.addEventListener('touchstart', (e) => {
+        // e.preventDefault(); // allow default to handle taps sometimes, but prevent scrolling
+        if(e.touches.length > 0) {
+            setTargetX(e.touches[0].clientX);
+        }
+    }, { passive: false });
     
-    btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); keys.right = true; });
-    btnRight.addEventListener('touchend', (e) => { e.preventDefault(); keys.right = false; });
+    window.addEventListener('touchmove', (e) => {
+        if (gameState === 'PLAYING' && e.touches.length > 0) {
+            setTargetX(e.touches[0].clientX);
+        }
+    }, { passive: false });
     
     // Start Interaction (Clicking anywhere on start screen)
     startScreen.addEventListener('click', startGame);
     
     // Restart Interaction
-    btnRestart.addEventListener('click', startGame);
+    btnRestart.addEventListener('click', () => {
+        document.getElementById('ui-bar').style.display = 'block'; // re-show UI
+        startGame();
+    });
 
 });

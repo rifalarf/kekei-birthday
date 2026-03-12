@@ -74,6 +74,17 @@ body {
     overflow: hidden;
 }
 
+#game-container.shake {
+    animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-2px, 0, 0); }
+    20%, 80% { transform: translate3d(4px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+    40%, 60% { transform: translate3d(6px, 0, 0); }
+}
+
 #win-screen {
     background-color: rgba(26, 11, 46, 0.85); /* Translucent dark background */
     z-index: 20; /* Ensure it floats above canvas */
@@ -195,10 +206,11 @@ body {
     position: absolute;
     top: 10px;
     left: 10px;
-    font-size: 14px;
+    font-size: 10px;
     color: var(--cyan);
     text-shadow: 2px 2px 0px #000;
     z-index: 10;
+    line-height: 1.5;
 }
 
 #game-canvas {
@@ -210,42 +222,11 @@ body {
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    touch-action: none; /* Crucial for touch dragging on mobile */
 }
 
-/* Mobile Controls Layered over canvas */
+/* Hide mobile controls as they are replaced by drag */
 #mobile-controls {
-    position: absolute;
-    bottom: 20px;
-    left: 0;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 40px;
-    z-index: 10;
+    display: none !important;
 }
 
-#mobile-controls button {
-    background: rgba(255, 71, 126, 0.3);
-    border: 3px solid var(--primary);
-    color: white;
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    font-size: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 0 15px var(--primary);
-    transition: background 0.1s;
-}
-
-#mobile-controls button:active {
-    background: rgba(255, 71, 126, 0.7);
-    transform: scale(0.95);
-}
-
-@media (min-width: 768px) {
-    #mobile-controls {
-        display: none; /* Hide on desktop assuming keyboard use */
-    }
-}
