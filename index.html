@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Birthday Kekei!</title>
+    <!-- Google Fonts: Press Start 2P for retro feeling -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- CRT Scanline Effect Overlay -->
+    <div class="scanlines"></div>
+
+    <div id="game-container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <h1 class="title">CATCH MY HEART</h1>
+            <h2 class="subtitle">For Kekei <span class="heart">♥</span></h2>
+            <div class="instructions">
+                <p>Tangkap 20 hati untuk membuka pesan rahasia!</p>
+                <p class="blink">TAP HERE TO START</p>
+            </div>
+            <!-- Decorative pixel art or CSS shapes can go here -->
+            <div class="pixel-deco bounce">🎁</div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div id="ui-bar">
+                <div id="score-display">Hati: 0/20</div>
+            </div>
+            <canvas id="game-canvas"></canvas>
+            
+            <!-- Mobile Controls -->
+            <div id="mobile-controls">
+                <button id="btn-left">◀</button>
+                <button id="btn-right">▶</button>
+            </div>
+        </div>
+
+        <!-- Win Screen -->
+        <div id="win-screen" class="screen">
+            <h1 class="title rainbow-text">HAPPY BIRTHDAY!</h1>
+            <div class="message-box"></div>
+            <p class="blink" style="margin-top: 20px; font-size: 10px; cursor: pointer; display: none;" id="btn-restart">TAP TO PLAY AGAIN</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
